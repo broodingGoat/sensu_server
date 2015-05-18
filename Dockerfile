@@ -4,19 +4,17 @@ MAINTAINER Sushaant Mujoo <sushaant.mujoo@gmail.com>
 
 # Get base packages & configure
 
-RUN apt-get update
+#RUN apt-get update
 RUN apt-get install -y git
 RUN apt-get install -y curl
 RUN apt-get install -y openssl
-RUN apt-get install -y openssh
 RUN apt-get install -y openssh-server
-RUN apt-get install -y openssh-clients
+RUN apt-get install -y openssh-client
 EXPOSE 22 3000 4567 5671 15672
-
+RUN git clone https://github.com/broodingGoat/sensu_server.git
 
 # Add users
-RUN adduser --disabled-password --gecos "" sensu
-RUN echo "sensu" | passwd sensu --stdin
+RUN useradd sens -p sensu
 RUN echo "sensu ALL=(ALL:ALL) ALL" | (EDITOR="tee -a" visudo)
 
 # Installing Redis
@@ -29,7 +27,6 @@ RUN echo "deb http://www.rabbitmq.com/debian/ testing main" | tee -a /etc/apt/so
 RUN curl -L -o ~/rabbitmq-signing-key-public.asc http://www.rabbitmq.com/rabbitmq-signing-key-public.asc
 RUN apt-key add ~/rabbitmq-signing-key-public.asc
 RUN apt-get install -y rabbitmq-server erlang-nox
-RUN git clone https://github.com/broodingGoat/sensu_server.git
 RUN cd sensu_server/ssl; ./ssl_certs.sh clean && ./ssl_certs.sh generate
 RUN mkdir /etc/rabbitmq/ssl
 RUN cp sensu_server/ssl/server_cert.pem /etc/rabbitmq/ssl/cert.pem
